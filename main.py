@@ -4,8 +4,8 @@ curl -X 'POST' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json' \
   -d '{
-  "login": "u1",
-  "email": "test@test.de",
+  "login": "u2",
+  "email": "test@test2.de",
   "password": "123456789"
 }'
 curl -X 'PUT' \
