@@ -1,13 +1,18 @@
 name: Python tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - class_client
+  pull_request:
 
 jobs:
   test:
-    name: Python tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -20,4 +25,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest./tests
+          pytest
