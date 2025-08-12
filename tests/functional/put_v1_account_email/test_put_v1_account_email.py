@@ -15,36 +15,36 @@ def test_change_email_e2e():
     login_api = LoginApi(host=host_api)
     mailhog_api = MailhogApi(host=host_mailhog)
 
-    # 1) Register new user
+    # 1 Register new user
     print("STEP 1: Register new user")
     response = account_api.post_v1_account(
         json_data={"login": login, "email": email, "password": password}
     )
     assert response.status_code == 201, f"Registration failed: {response.text}"
 
-    # 2) Get activation token from mail (by login)
+    # 2 Get activation token from mail (by login)
     print("STEP 2: Get activation token from Mailhog by login")
     messages_response = mailhog_api.get_api_v2_messages()
     activation_token = get_activation_token_by_login(login, messages_response)
     assert activation_token is not None, "Activation token not found in Mailhog"
 
-    # 3) Activate user
+    # 3 Activate user
     print("STEP 3: Activate user with token")
     response = account_api.put_v1_account_token(token=activation_token)
     assert response.status_code == 200, f"Activation failed: {response.text}"
 
-    # 4) Log in
+    # 4 Log in
     print("STEP 4: Log in")
     response = login_api.post_v1_account_login(
         json_data={"login": login, "password": password, "rememberMe": True}
     )
     assert response.status_code == 200, f"Login failed: {response.text}"
 
-    # 5) Change email (requires auth token + full payload: login, password, email)
+    # 5 Change email
     print("STEP 5: Change email (authorized request)")
     auth_token = response.headers.get("X-Dm-Auth-Token")
     assert auth_token is not None, "No X-Dm-Auth-Token in login response headers"
-    # положим токен в клиент аккаунта
+
     if hasattr(account_api, "set_headers"):
         account_api.set_headers({"X-Dm-Auth-Token": auth_token})
     else:
@@ -74,7 +74,7 @@ def test_change_email_e2e():
     assert response.status_code == 200, f"New email activation failed: {response.text}"
 
     # 9) Login again — now should succeed (200)
-    print("STEP 9: Final login (should succeed)")
+    print("STEP 9: Final login ")
     response = login_api.post_v1_account_login(
         json_data={"login": login, "password": password, "rememberMe": True}
     )
