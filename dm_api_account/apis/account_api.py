@@ -2,12 +2,14 @@ import requests
 
 
 class AccountApi:
-    def __init__(
-            self,
-            host,
-            headers=None
-    ):
+    def __init__(self,
+                 host,
+                 headers=None):
         self.host = host
+        self.headers = headers
+
+    def set_headers(self,
+                    headers):
         self.headers = headers
 
     def post_v1_account(self,
@@ -33,3 +35,18 @@ class AccountApi:
         response = requests.put(
             url=f'{self.host}/v1/account/{token}')
         return response
+
+    def put_v1_account_email(self,
+                             json_data):
+        """
+        Change user email
+        :param json_data: {"email": "new_email@example.com"}
+        :return:
+        """
+        response = requests.put(
+            url=f'{self.host}/v1/account/email',
+            headers=self.headers,
+            json=json_data
+        )
+        return response
+

@@ -26,3 +26,4 @@ class MailhogApi:
             verify=False
         )
         return response
+
