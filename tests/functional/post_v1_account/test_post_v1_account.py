@@ -1,10 +1,21 @@
+import collections
 from dm_api_account.apis.account_api import AccountApi
 from dm_api_account.apis.login_api import LoginApi
 from api_mailhog.apis.mailhog_api import MailhogApi
 from tests.helpers.mailhog_tools import get_activation_token_by_login
 from tests.helpers.test_data import host_api, host_mailhog, login, password, email
+import structlog
+
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer(
+            indent=4,
+            sort_keys=True,
 
 
+        )
+    ]
+)
 def test_post_v1_account():
     account_api = AccountApi(host=host_api)
     login_api = LoginApi(host=host_api)
