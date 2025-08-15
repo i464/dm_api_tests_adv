@@ -5,6 +5,8 @@ from api_mailhog.apis.mailhog_api import MailhogApi
 from tests.helpers.mailhog_tools import get_activation_token_by_login
 from tests.helpers.test_data import host_api, host_mailhog, login, password, email
 import structlog
+from restclient.configuration import Configuration as MailhogConfiguration
+from restclient.configuration import Configuration as DmApiConfiguration
 
 structlog.configure(
     processors=[
@@ -17,9 +19,11 @@ structlog.configure(
     ]
 )
 def test_post_v1_account():
-    account_api = AccountApi(host=host_api)
-    login_api = LoginApi(host=host_api)
-    mailhog_api = MailhogApi(host=host_mailhog)
+    mailhog_configuration = MailhogConfiguration(host=host_mailhog,disable_log=True)
+    dm_api_configuration = DmApiConfiguration(host=host_api,disable_log=False)
+    account_api = AccountApi(configuration=dm_api_configuration)
+    login_api = LoginApi(configuration=dm_api_configuration)
+    mailhog_api = MailhogApi(configuration=mailhog_configuration)
 
     # 1. Register new user
     response = account_api.post_v1_account(
