@@ -2,13 +2,18 @@ from dm_api_account.apis.account_api import AccountApi
 from api_mailhog.apis.mailhog_api import MailhogApi
 from utils.mailhog_tools import get_activation_token_by_login
 from tests.data.test_data import host_api, host_mailhog, login, password, email
+from restclient.configuration import Configuration
 
 
 def test_put_v1_account_token():
-    account_api = AccountApi(host=host_api)
-    mailhog_api = MailhogApi(host=host_mailhog)
+    # create API client objects
+    dm_api_config = Configuration(host=host_api)
+    mailhog_config = Configuration(host=host_mailhog)
 
-    # 1. Register user
+    account_api = AccountApi(configuration=dm_api_config)
+    mailhog_api = MailhogApi(configuration=mailhog_config)
+
+    # register user
     response = account_api.post_v1_account(
         json_data={
             "login": login,
@@ -18,13 +23,13 @@ def test_put_v1_account_token():
     )
     assert response.status_code == 201, f"User not created: {response.text}"
 
-    # 2. Get token from Mailhog
+    # get token from Mailhog
     response = mailhog_api.get_api_v2_messages()
     assert response.status_code == 200, f"No emails received: {response.text}"
 
     token = get_activation_token_by_login(login, response)
     assert token is not None, f"Activation token not found for {login}"
 
-    # 3. Activate user
+    # activate user
     response = account_api.put_v1_account_token(token=token)
     assert response.status_code == 200, f"User not activated: {response.text}"
