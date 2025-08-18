@@ -1,8 +1,8 @@
 from dm_api_account.apis.account_api import AccountApi
 from dm_api_account.apis.login_api import LoginApi
 from api_mailhog.apis.mailhog_api import MailhogApi
-from tests.helpers.mailhog_tools import get_activation_token_by_login
-from tests.helpers.test_data import host_api, host_mailhog, password, login, email
+from utils.mailhog_tools import get_activation_token_by_login
+from tests.data.test_data import host_api, host_mailhog, password, login, email
 
 
 def test_post_v1_account_login():
