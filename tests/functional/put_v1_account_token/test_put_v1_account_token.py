@@ -3,6 +3,8 @@ from api_mailhog.apis.mailhog_api import MailhogApi
 from utils.mailhog_tools import get_activation_token_by_login
 from tests.data.test_data import host_api, host_mailhog, login, password, email
 from restclient.configuration import Configuration
+from helpers.token_waiters import wait_activation_token_by_login
+
 
 
 def test_put_v1_account_token():
@@ -23,13 +25,10 @@ def test_put_v1_account_token():
     )
     assert response.status_code == 201, f"User not created: {response.text}"
 
-    # get token from Mailhog
-    response = mailhog_api.get_api_v2_messages()
-    assert response.status_code == 200, f"No emails received: {response.text}"
-
-    token = get_activation_token_by_login(login, response)
-    assert token is not None, f"Activation token not found for {login}"
+    # wait for activation token
+    activation_token = wait_activation_token_by_login(mailhog_api, login )
+    assert activation_token is not None, f"Activation token not found in MailHog for {login}"
 
     # activate user
-    response = account_api.put_v1_account_token(token=token)
+    response = account_api.put_v1_account_token(token=activation_token)
     assert response.status_code == 200, f"User not activated: {response.text}"

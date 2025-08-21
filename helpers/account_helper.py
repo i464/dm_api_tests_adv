@@ -1,11 +1,10 @@
-
-from utils.mailhog_tools import get_activation_token_by_login
+from helpers.token_waiters import wait_activation_token_by_login, wait_email_change_token
 
 class AccountHelper:
     def __init__(self, dm_account_api, mailhog):
         """
-        dm_account_api: fasade with .account_api и .login_api
-        mailhog: fasade with .mailhog_api
+        dm_account_api: facade with .account_api и .login_api
+        mailhog: facade with .mailhog_api
         """
         self.dm_account_api = dm_account_api
         self.mailhog = mailhog
@@ -21,7 +20,12 @@ class AccountHelper:
         return response
 
     def register_new_user(self, login: str, email: str, password: str):
-        # 1) register
+        """
+        1) Register user
+        2) Wait for activation token via MailHog (smart waiter with retries)
+        3) Activate user
+        """
+        # Step 1 register
         response = self.dm_account_api.account_api.post_v1_account(json_data={
             'login': login,
             'email': email,
@@ -29,15 +33,11 @@ class AccountHelper:
         })
         assert response.status_code == 201, f"User not created: {response.text}"
 
-        # 2) read mail
-        response_mail = self.mailhog.mailhog_api.get_api_v2_messages()
-        assert response_mail.status_code == 200, f"No emails: {response_mail.text}"
-
-        # 3) extract token
-        token = get_activation_token_by_login(login, response_mail)
+        # Step 2 wait for activation token (no manual parsing here)
+        token = wait_activation_token_by_login(self.mailhog.mailhog_api, login)
         assert token, f"No activation token for {login}"
 
-        # 4) activate
+        # Step 3 activate
         response = self.dm_account_api.account_api.put_v1_account_token(token=token)
         assert response.status_code == 200, f"User not activated: {response.text}"
         return response
